@@ -38,7 +38,7 @@ BATCH = 16
 EPOCH = 400
 LR = 1e-5
 
-PRETRAIN = False
+PRETRAIN = True
 
 METRICS = 6
 METRICS_LOSS = 0
@@ -53,9 +53,9 @@ LAMBDA_1 = 3
 # Gradient Difference Loss
 LAMBDA_2 = 1
 
-DATA_PATH = "C:/Users/PHOENIX/Desktop/DLMI/Data"
+DATA_PATH = "/home/ccy/DLMI/Data"
 MODEL_PATH = ""
-RESULTS_PATH = "C:/Users/PHOENIX/Desktop/DLMI/UNET/Result"
+RESULTS_PATH = "/home/ccy/DLMI/UNET/Result"
 
 
 """
@@ -292,8 +292,6 @@ class Training():
             real1_g = (real1_g * 2) - 1
 
             # Linear Sacling to [-1, 1]
-            real2_g -= -1000
-            real2_g /= 4000
             real2_g = (real2_g * 2) - 1
 
             # Get sCT from Generator
@@ -400,8 +398,6 @@ class Training():
                 real1_g = (real1_g * 2) - 1
 
                 # Linear Sacling to [-1, 1]
-                real2_g -= -1000
-                real2_g /= 4000
                 real2_g = (real2_g * 2) - 1
                 
                 # Get sCT from Generator
@@ -427,6 +423,10 @@ class Training():
                 Metrics
                 ========================================================================================
                 """
+                # Reconstruction
+                real2_g = ((real2_g + 1) * 2000) - 1000
+                fake2_g = ((fake2_g + 1) * 2000) - 1000
+
                 # MAE
                 mae = get_mae(fake2_g, real2_g)
 
@@ -547,8 +547,6 @@ class Training():
             real1_g = (real1_g * 2) - 1
 
             # Linear Sacling to [-1, 1]
-            real2_g -= -1000
-            real2_g /= 4000
             real2_g = (real2_g * 2) - 1
 
             # Get sCT from Generator

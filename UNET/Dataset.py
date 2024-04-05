@@ -4,6 +4,7 @@ Package
 ====================================================================================================
 """
 import os
+import random
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -141,16 +142,23 @@ Main Function
 """
 if __name__ == '__main__':
 
-    filepath = "C:/Users/PHOENIX/Desktop/DLMI/Data"
+    filepath = "/home/ccy/DLMI/Data"
 
     train = Train(filepath)
     val = Val(filepath)
     test = Test(filepath)
 
-    image, label = val[3]
+    for i in range(5):
 
-    print()
-    print('Train:', len(train))
-    print('Val:', len(val))
-    print('Test:', len(test))
-    print()
+        index = random.randint(0, len(train) - 1)
+
+        image, label = train[index]
+        
+        print()
+        print('image:')
+        print(image.min(), image.max())
+        print(image.mean(), image.std())
+        print('label:')
+        print(label.min(), label.max())
+        print(label.mean(), label.std())
+        print()

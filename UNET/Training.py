@@ -35,8 +35,8 @@ Global Constant
 MAX = 10000000
 STRIDE = 5
 BATCH = 16
-EPOCH = 400
-LR = 1e-5
+EPOCH = 1600
+LR = 1e-6
 
 PRETRAIN = True
 
@@ -50,12 +50,12 @@ METRICS_PSNR = 5
 METRICS_SSIM = 6
 
 # Pixel-Wise Loss
-LAMBDA_1 = 3
+LAMBDA_1 = 10
 # Gradient Difference Loss
 LAMBDA_2 = 1
 
 DATA_PATH = "/home/ccy/DLMI/Data"
-MODEL_PATH = ""
+MODEL_PATH = "UNET/Result/Model/2024-04-05_22-35.pt"
 RESULTS_PATH = "/home/ccy/DLMI/UNET/Result"
 
 
@@ -155,7 +155,7 @@ class Training():
 
             # Training Timestamp
             self.time = checkpoint['time']
-            print('\n' + 'Continued From: ' +  self.time + '\n')
+            print('\n' + 'Continued From: ' +  self.time)
 
             # Model: Generator and Discriminator
             self.model.load_state_dict(checkpoint['model_state'])
@@ -168,12 +168,16 @@ class Training():
             self.train_writer = SummaryWriter(log_dir + '/Train')
             self.val_writer = SummaryWriter(log_dir + '/Val')
 
+            # Dataset Sample Index
+            self.train_index = checkpoint['train_index']
+            self.val_index = checkpoint['val_index']
+
             # Begin Point
             if checkpoint['epoch'] < EPOCH:
                 self.begin = checkpoint['epoch'] + 1
             else:
                 self.begin = 1
-            print('\n' + 'Start From Epoch: ' + str(self.begin) + '\n')
+            print('\n' + 'Start From Epoch: ' + str(self.begin))
 
             return checkpoint['score']
         

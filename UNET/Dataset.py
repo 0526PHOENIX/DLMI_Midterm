@@ -25,6 +25,7 @@ class Train(Dataset):
         self.root = root
         self.images_path = os.path.join(self.root, 'Train', 'MR.npy')
         self.labels_path = os.path.join(self.root, 'Train', 'CT.npy')
+        self.masks_path = os.path.join(self.root, 'Train', 'TG.npy')
 
         # Load MR Data: (570, 256, 256)
         self.images = np.load(self.images_path).astype('float32')
@@ -33,6 +34,10 @@ class Train(Dataset):
         # Load CT Data: (570, 256, 256)
         self.labels = np.load(self.labels_path).astype('float32')
         self.labels = torch.from_numpy(self.labels)
+
+        # Load TG Data: (570, 256, 256)
+        self.masks = np.load(self.masks_path).astype('bool')
+        self.masks = torch.from_numpy(self.masks)
 
         # Check Data Quantity
         if self.images.shape != self.labels.shape:
@@ -50,7 +55,10 @@ class Train(Dataset):
         # Load CT Data: (1, 256, 256)
         label = self.labels[index : index + 1, :, :]
 
-        return (image, label)
+        # Load TG Data: (1, 256, 256)
+        mask = self.masks[index : index + 1, :, :]
+
+        return (image, label, mask)
     
 
 """
@@ -66,6 +74,7 @@ class Val(Dataset):
         self.root = root
         self.images_path = os.path.join(self.root, 'Val', 'MR.npy')
         self.labels_path = os.path.join(self.root, 'Val', 'CT.npy')
+        self.masks_path = os.path.join(self.root, 'Val', 'TG.npy')
 
         # Load MR Data: (90, 256, 256)
         self.images = np.load(self.images_path).astype('float32')
@@ -74,6 +83,10 @@ class Val(Dataset):
         # Load CT Data: (90, 256, 256)
         self.labels = np.load(self.labels_path).astype('float32')
         self.labels = torch.from_numpy(self.labels)
+
+        # Load TG Data: (90, 256, 256)
+        self.masks = np.load(self.masks_path).astype('bool')
+        self.masks = torch.from_numpy(self.masks)
 
         # Check Data Quantity
         if self.images.shape != self.labels.shape:
@@ -91,7 +104,10 @@ class Val(Dataset):
         # Load CT Data: (1, 256, 256)
         label = self.labels[index : index + 1, :, :]
 
-        return (image, label)
+        # Load TG Data: (1, 256, 256)
+        mask = self.masks[index : index + 1, :, :]
+
+        return (image, label, mask)
     
 
 """
@@ -107,6 +123,8 @@ class Test(Dataset):
         self.root = root
         self.images_path = os.path.join(self.root, 'Test', 'MR.npy')
         self.labels_path = os.path.join(self.root, 'Test', 'CT.npy')
+        self.masks_path = os.path.join(self.root, 'Test', 'TG.npy')
+
 
         # Load MR Data: (150, 256, 256)
         self.images = np.load(self.images_path).astype('float32')
@@ -115,6 +133,10 @@ class Test(Dataset):
         # Load CT Data: (150, 256, 256)
         self.labels = np.load(self.labels_path).astype('float32')
         self.labels = torch.from_numpy(self.labels)
+
+        # Load CT Data: (150, 256, 256)
+        self.masks = np.load(self.masks_path).astype('bool')
+        self.masks = torch.from_numpy(self.masks)
 
         # Check Data Quantity
         if self.images.shape != self.labels.shape:
@@ -132,7 +154,10 @@ class Test(Dataset):
         # Load CT Data: (1, 256, 256)
         label = self.labels[index : index + 1, :, :]
 
-        return (image, label)
+        # Load TG Data: (1, 256, 256)
+        mask = self.masks[index : index + 1, :, :]
+
+        return (image, label, mask)
     
 
 """
@@ -152,7 +177,7 @@ if __name__ == '__main__':
 
         index = random.randint(0, len(train) - 1)
 
-        image, label = train[index]
+        image, label, mask = train[index]
         
         print()
         print('image:')

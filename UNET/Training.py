@@ -22,7 +22,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from Unet import Unet, Pretrain
 from Loss import get_pix_loss, get_gdl_loss
-from Loss import get_mae, get_skull, get_dice
+from Loss import get_mae, get_head, get_skull, get_dice
 from Loss import get_psnr, get_ssim
 from Dataset import Train, Val
 
@@ -40,13 +40,14 @@ LR = 1e-5
 
 PRETRAIN = True
 
-METRICS = 6
+METRICS = 7
 METRICS_LOSS = 0
 METRICS_MAE = 1
-METRICS_SKULL = 2
-METRICS_DICE = 3
-METRICS_PSNR = 4
-METRICS_SSIM = 5
+METRICS_HEAD = 2
+METRICS_SKULL = 3
+METRICS_DICE = 4
+METRICS_PSNR = 5
+METRICS_SSIM = 6
 
 # Pixel-Wise Loss
 LAMBDA_1 = 3
@@ -278,10 +279,11 @@ class Training():
             ========================================================================================
             """
             # Get MT and rCT
-            # real1: MR; real2: rCT
-            (real1_t, real2_t) = batch_tuple
+            # real1: MR; real2: rCT; mask: Head Region
+            (real1_t, real2_t, mask_t) = batch_tuple
             real1_g = real1_t.to(self.device)
             real2_g = real2_t.to(self.device)
+            mask_g = mask_t.to(self.device)
 
             # Z-Score Normalization
             real1_g -= real1_g.mean()
@@ -331,6 +333,9 @@ class Training():
             # MAE
             mae = get_mae(fake2_g, real2_g)
 
+            # Head MAE
+            head = get_head(fake2_g, real2_g, mask_g)
+
             # Skull MAE
             skull = get_skull(fake2_g, real2_g)
 
@@ -346,6 +351,7 @@ class Training():
             # Save Metrics
             metrics[METRICS_LOSS, batch_index] = loss.item()
             metrics[METRICS_MAE, batch_index] = mae
+            metrics[METRICS_HEAD, batch_index] = head
             metrics[METRICS_SKULL, batch_index] = skull
             metrics[METRICS_DICE, batch_index] = dice
             metrics[METRICS_PSNR, batch_index] = psnr
@@ -353,7 +359,8 @@ class Training():
 
             # Progress Bar Information
             progress.set_description('Epoch [' + space.format(epoch_index, ' / ', EPOCH) + ']')
-            progress.set_postfix(ordered_dict = {'Loss': loss.item(), 'MAE': mae, 'Skull': skull})
+            progress.set_postfix(ordered_dict = {'Loss': loss.item(), 'MAE': mae,
+                                                 'Head': head, 'Skull': skull})
 
         return metrics.to('cpu')
 
@@ -384,10 +391,11 @@ class Training():
                 ========================================================================================
                 """
                 # Get MT and rCT
-                # real1: MR; real2: rCT
-                (real1_t, real2_t) = batch_tuple
+                # real1: MR; real2: rCT; mask: Head Region
+                (real1_t, real2_t, mask_t) = batch_tuple
                 real1_g = real1_t.to(self.device)
                 real2_g = real2_t.to(self.device)
+                mask_g = mask_t.to(self.device)
 
                 # Z-Score Normalization
                 real1_g -= real1_g.mean()
@@ -430,6 +438,9 @@ class Training():
                 # MAE
                 mae = get_mae(fake2_g, real2_g)
 
+                # Head MAE
+                head = get_head(fake2_g, real2_g, mask_g)
+
                 # Skull MAE
                 skull = get_skull(fake2_g, real2_g)
 
@@ -445,6 +456,7 @@ class Training():
                 # Save Metrics
                 metrics[METRICS_LOSS, batch_index] = loss.item()
                 metrics[METRICS_MAE, batch_index] = mae
+                metrics[METRICS_HEAD, batch_index] = head
                 metrics[METRICS_SKULL, batch_index] = skull
                 metrics[METRICS_DICE, batch_index] = dice
                 metrics[METRICS_PSNR, batch_index] = psnr
@@ -452,7 +464,8 @@ class Training():
 
                 # Progress Bar Information
                 progress.set_description('Epoch [' + space.format(epoch_index, ' / ', EPOCH) + ']')
-                progress.set_postfix(ordered_dict = {'Loss': loss.item(), 'MAE': mae, 'Skull': skull})
+                progress.set_postfix(ordered_dict = {'Loss': loss.item(), 'MAE': mae,
+                                                     'Head': head, 'Skull': skull})
 
             return metrics.to('cpu')
         
@@ -494,6 +507,7 @@ class Training():
         metrics_dict = {}
         metrics_dict['Loss/LOSS'] = metrics_a[METRICS_LOSS]
         metrics_dict['Metrics/MAE'] = metrics_a[METRICS_MAE]
+        metrics_dict['Metrics/MAE_Head'] = metrics_a[METRICS_HEAD]
         metrics_dict['Metrics/MAE_Skull'] = metrics_a[METRICS_SKULL]
         metrics_dict['Metrics/DICE_Skull'] = metrics_a[METRICS_DICE]
         metrics_dict['Metrics/PSNR'] = metrics_a[METRICS_PSNR]
@@ -533,8 +547,8 @@ class Training():
             index = getattr(self, mode + '_index')
 
             # Get MT and rCT
-            # real1: MR; real2: rCT
-            (real1_t, real2_t) = dataloader.dataset[index]
+            # real1: MR; real2: rCT; mask: Head Region
+            (real1_t, real2_t, mask_t) = dataloader.dataset[index]
             real1_g = real1_t.to(self.device).unsqueeze(0)
             real2_g = real2_t.to(self.device).unsqueeze(0)
 
@@ -557,6 +571,7 @@ class Training():
             real1_a = real1_g.to('cpu').detach().numpy()[0]
             real2_a = real2_g.to('cpu').detach().numpy()[0]
             fake2_a = fake2_g.to('cpu').detach().numpy()[0]
+            mask_a = mask_t.numpy()
 
             # Linear Sacling to [0, 1]
             real1_a -= real1_a.min()
@@ -565,6 +580,9 @@ class Training():
             # Linear Sacling to [0, 1]
             real2_a = (real2_a + 1) / 2
             fake2_a = (fake2_a + 1) / 2
+
+            # Remove Background
+            fake2_a = np.where(mask_a, fake2_a, 0)
 
             # Save Image
             writer.add_image(mode + '/MR', real1_a, epoch_index, dataformats = 'CHW')

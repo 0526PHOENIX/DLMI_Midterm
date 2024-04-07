@@ -34,8 +34,8 @@ Global Constant
 """
 MAX = 10000000
 STRIDE = 5
-BATCH = 16
-EPOCH = 1600
+BATCH = 8
+EPOCH = 2000
 LR = 1e-6
 
 PRETRAIN = True
@@ -50,12 +50,12 @@ METRICS_PSNR = 5
 METRICS_SSIM = 6
 
 # Pixel-Wise Loss
-LAMBDA_1 = 10
+LAMBDA_1 = 1
 # Gradient Difference Loss
 LAMBDA_2 = 1
 
 DATA_PATH = "/home/ccy/DLMI/Data"
-MODEL_PATH = "UNET/Result/Model/2024-04-05_22-35.pt"
+MODEL_PATH = ""
 RESULTS_PATH = "/home/ccy/DLMI/UNET/Result"
 
 

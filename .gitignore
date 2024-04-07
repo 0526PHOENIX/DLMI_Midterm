@@ -3,6 +3,7 @@
 /Data_Raw
 /Data_Nii
 /UNET/Result
+/UNET/Evaluate
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

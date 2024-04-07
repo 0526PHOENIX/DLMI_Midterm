@@ -6,8 +6,6 @@ Package
 import os
 import random
 import numpy as np
-import nibabel as nib
-from scipy import io
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
@@ -43,13 +41,9 @@ METRICS_SSIM = 5
 
 PRETRAIN = True
 
-VAL_PATH = "/home/ccy/PseudoCT/Data_2D/Train"
-TEST_PATH = "/home/ccy/PseudoCT/Data_2D/Test"
-
-FILE_PATH = "/home/ccy/PseudoCT/Data/Train"
-
-MODEL_PATH = "/home/ccy/PseudoCT/GAN/Result/Model/2024-04-04_06-00.pt"
-RESULTS_PATH = "/home/ccy/PseudoCT/GAN/Evaluate"
+DATA_PATH = "/home/ccy/DLMI/Data"
+MODEL_PATH = ""
+RESULTS_PATH = "/home/ccy/DLMI/UNET/Evaluate"
 
 
 """
@@ -96,11 +90,11 @@ class Evaluate():
     def init_dl(self):
 
         # Validation
-        val_ds = Training_2D(root = VAL_PATH, is_val = True, val_stride = STRIDE)
+        val_ds = Val(root = DATA_PATH)
         val_dl = DataLoader(val_ds, batch_size = BATCH, shuffle = True, drop_last = False)
 
         # Testing
-        test_ds = Testing_2D(root = TEST_PATH)
+        test_ds = Test(root = DATA_PATH)
         test_dl = DataLoader(test_ds, batch_size = BATCH, drop_last = False)
 
         return val_dl, test_dl
@@ -119,10 +113,14 @@ class Evaluate():
             print('\n' + 'Model Trained at: ' + checkpoint['time'])
             print('\n' + 'Model Saved at Epoch: ' + str(checkpoint['epoch']))
 
-            # Model: Generator
-            self.gen = Generator(pretrain = PRETRAIN, slice = 7).to(self.device)
+            # Model: Unet
+            if PRETRAIN:
+                self.model = Pretrain().to(self.device)
 
-            self.gen.load_state_dict(checkpoint['gen_state'])
+            else:
+                self.model = Unet().to(self.device)
+
+            self.model.load_state_dict(checkpoint['model_state'])
 
             # Tensorboard
             self.init_tensorboard(checkpoint['time'])
@@ -134,7 +132,7 @@ class Evaluate():
     Main Evaluating Function
     ================================================================================================
     """
-    def main(self, number = ""):
+    def main(self):
 
         # Data Loader
         val_dl, test_dl = self.init_dl()
@@ -148,21 +146,17 @@ class Evaluate():
         self.print_result(metrics_val)
         self.save_images('val', val_dl)
 
-        # # Evaluate Model
-        # print('\n' + 'Testing: ')
-        # metrics_test = self.evaluation('test', test_dl)
-        # self.print_result(metrics_test)
-        # self.save_images('test', test_dl)
-
-        # # Infernece New Data
-        # print('\n' + 'Inferencing: ')
-        # self.inference(number = number)
+        # Evaluate Model
+        print('\n' + 'Testing: ')
+        metrics_test = self.evaluation('test', test_dl)
+        self.print_result(metrics_test)
+        self.save_images('test', test_dl)
 
         return
 
     """
     ================================================================================================
-    Validation Loop
+    Validation & Testing Loop
     ================================================================================================
     """
     def evaluation(self, mode, dataloader):
@@ -170,7 +164,7 @@ class Evaluate():
         with torch.no_grad():
 
             # Model: Validation State
-            self.gen.eval()
+            self.model.eval()
 
             # Buffer for Matrics
             metrics = torch.zeros(METRICS, len(dataloader), device = self.device)
@@ -200,13 +194,11 @@ class Evaluate():
                 real1_g = (real1_g * 2) - 1
 
                 # Linear Sacling to [-1, 1]
-                real2_g -= -1000
-                real2_g /= 4000
                 real2_g = (real2_g * 2) - 1
 
                 # Get sCT from Generator
                 # fake2: sCT
-                fake2_g = self.gen(real1_g)
+                fake2_g = self.model(real1_g)
 
                 """
                 ========================================================================================
@@ -250,7 +242,6 @@ class Evaluate():
 
         return metrics.to('cpu')
 
-
     """
     ================================================================================================
     Print Metrics' Mean and STD
@@ -283,7 +274,7 @@ class Evaluate():
         with torch.no_grad():
 
             # Model: Validation State
-            self.gen.eval()
+            self.model.eval()
         
             # Get Writer
             writer = getattr(self, mode + '_writer')
@@ -307,18 +298,16 @@ class Evaluate():
                 real1_g = (real1_g * 2) - 1
 
                 # Linear Sacling to [-1, 1]
-                real2_g -= -1000
-                real2_g /= 4000
                 real2_g = (real2_g * 2) - 1
 
                 # Get sCT from Generator
                 # fake2: sCT
-                fake2_g = self.gen(real1_g)
+                fake2_g = self.model(real1_g)
 
                 # Torch Tensor to Numpy Array
-                real1_a = real1_g.to('cpu').detach().numpy()[:, 3, :, :]
-                real2_a = real2_g.to('cpu').detach().numpy()[0, :, :, :]
-                fake2_a = fake2_g.to('cpu').detach().numpy()[0, :, :, :]
+                real1_a = real1_g.to('cpu').detach().numpy()[0]
+                real2_a = real2_g.to('cpu').detach().numpy()[0]
+                fake2_a = fake2_g.to('cpu').detach().numpy()[0]
                 mask_a = mask_t.numpy()
 
                 # Linear Sacling to [0, 1]
@@ -365,65 +354,6 @@ class Evaluate():
 
         return
 
-    """
-    ================================================================================================
-    Inference
-    ================================================================================================
-    """
-    def inference(self, number = "", width = 3):
-
-        with torch.no_grad():
-
-            # Model: validation State
-            self.gen.eval()
-
-            # Get MR Series
-            image = io.loadmat(os.path.join(FILE_PATH, 'MR', 'MR' + number + '.mat'))['MR'].astype('float32')
-
-            # Numpy Array to Torch Tensor
-            image = torch.from_numpy(image)
-
-            buffer = []
-            for i in range(width, image.shape[0] - width):
-
-                # Get MR and CT Slice
-                # real1: MR; real2: rCT
-                real1_t = image[i - width : i + width + 1, :, :]
-
-                real1_g = real1_t.to(self.device).unsqueeze(0)
-
-                # Z-Score Normalization
-                real1_g -= real1_g.mean()
-                real1_g /= real1_g.std()
-                # Linear Sacling to [-1, 1]
-                real1_g -= real1_g.min()
-                real1_g /= real1_g.max()
-                real1_g = (real1_g * 2) - 1
-
-                # Get sCT from Generator
-                # fake2: sCT
-                fake2_g = self.gen(real1_g)
-
-                # Reconstruction
-                fake2_g = ((fake2_g + 1) * 2000) - 1000
-
-                # Torch Tensor to Numpy Array
-                fake2_a = fake2_g.to('cpu').detach().numpy()[0, 0, :, :]
-
-                # Stack
-                buffer.append(fake2_a)
-
-            # Get CT Series from Stack
-            result = np.stack(buffer, axis = 0)
-
-            # Save CT Series
-            io.savemat(os.path.join(RESULTS_PATH, 'CT', 'CT' + number + '.mat'), {'CT': result})
-
-            result = nib.Nifti1Image(result, np.eye(4))
-            nib.save(result, os.path.join(RESULTS_PATH, 'CT', 'CT' + number + '.nii'))
-
-        return
-
 
 """
 ====================================================================================================
@@ -433,5 +363,5 @@ Main Function
 if __name__ == '__main__':
 
     eva = Evaluate()
-    eva.main(number = "03")
+    eva.main()
     

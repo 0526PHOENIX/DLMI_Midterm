@@ -42,7 +42,7 @@ METRICS_SSIM = 5
 PRETRAIN = True
 
 DATA_PATH = "/home/ccy/DLMI/Data"
-MODEL_PATH = ""
+MODEL_PATH = "/home/ccy/DLMI/UNET/Result/Model/2024-04-07_13-10.best.pt"
 RESULTS_PATH = "/home/ccy/DLMI/UNET/Evaluate"
 
 

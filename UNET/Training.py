@@ -55,7 +55,7 @@ LAMBDA_1 = 1
 LAMBDA_2 = 1
 
 DATA_PATH = "/home/ccy/DLMI/Data"
-MODEL_PATH = ""
+MODEL_PATH = "/home/ccy/DLMI/UNET/Result/Model/2024-04-07_13-10.pt"
 RESULTS_PATH = "/home/ccy/DLMI/UNET/Result"
 
 

@@ -6,6 +6,7 @@ Package
 import os
 from scipy import ndimage
 from scipy.ndimage.morphology import binary_dilation, binary_erosion
+from matplotlib import pyplot as plt
 
 import numpy as np
 import nibabel as nib
@@ -73,6 +74,10 @@ class Preprocess():
             image = self.images[i]
             label = self.labels[i]
 
+            # Rotate
+            image = np.rot90(image)
+            label = np.rot90(label)
+
             # Thresholding
             binary = (image > 0.0625)
 
@@ -131,14 +136,20 @@ class Preprocess():
             image = self.images[i]
             label = self.labels[i]
 
+            plt.subplot(1, 2, 1)
+            plt.imshow(image, cmap = 'gray')
+            plt.subplot(1, 2, 2)
+            plt.imshow(label, cmap = 'gray')
+            plt.show()
+
             space = "{: <15.2f}\t{: <15.2f}"
-            print(i + 1, 'MR:')
-            print(space.format(image.max(), image.min()))
-            print(space.format(image.mean(), image.std()))
+            print(i + 1, 'MR:', image.shape)
+            # print(space.format(image.max(), image.min()))
+            # print(space.format(image.mean(), image.std()))
             print()
-            print(i + 1, 'CT:')
-            print(space.format(label.max(), label.min()))
-            print(space.format(label.mean(), label.std()))
+            print(i + 1, 'CT:', label.shape)
+            # print(space.format(label.max(), label.min()))
+            # print(space.format(label.mean(), label.std()))
             print()
             print('===============================================================================')
 
@@ -187,4 +198,5 @@ if __name__ == '__main__':
     pre = Preprocess(DATA)
     pre.npy2nii()
 
+    # pre = Preprocess(DATA)
     # pre.check()

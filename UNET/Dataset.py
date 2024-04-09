@@ -8,6 +8,9 @@ import random
 import numpy as np
 from matplotlib import pyplot as plt
 
+import warnings
+warnings.filterwarnings('ignore')
+
 import torch
 from torch.utils.data import Dataset
 

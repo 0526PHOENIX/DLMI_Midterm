@@ -3,12 +3,16 @@
 Package
 ====================================================================================================
 """
+import warnings
+warnings.filterwarnings('ignore')
+
 import torch
 from torch.nn import MSELoss, L1Loss
 from torchmetrics.image import StructuralSimilarityIndexMeasure, PeakSignalNoiseRatio
 from torchmetrics.classification import Dice
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 """
 ====================================================================================================
@@ -40,6 +44,16 @@ def get_gdl_loss(predicts, labels):
     gdl_y = MSELoss().to(DEVICE)(grad_predicts_y, grad_labels_y)
 
     return gdl_x + gdl_y
+
+
+"""
+====================================================================================================
+Similarity Loss
+====================================================================================================
+"""
+def get_sim_loss(predicts, labels):
+
+    return 1 - StructuralSimilarityIndexMeasure().to(DEVICE)(predicts, labels)
 
 
 """
@@ -120,26 +134,5 @@ if __name__ == '__main__':
     image = torch.rand((16, 1, 256, 256))
     label = torch.rand((16, 1, 256, 256))
 
-    pix = get_pix_loss(image, label)
-    print(pix, pix.size())
-
-    gdl = get_gdl_loss(image, label)
-    print(gdl, gdl.size())
-
-    mae = get_mae(image, label)
-    print(mae)
-
-    skull = get_skull(image, label)
-    print(skull)
-
-    dice = get_dice(image, label)
-    print(dice)
-
-    psnr = get_psnr(image, label)
-    print(psnr)
-
-    ssim = get_ssim(image, label)
-    print(ssim)
-
-    dice = get_dice(image, label)
-    print(dice)
+    ssim = get_sim_loss(image, label)
+    print(ssim, ssim.size())

@@ -21,7 +21,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from Unet import Unet, Pretrain
-from Loss import get_pix_loss, get_gdl_loss
+from Loss import get_pix_loss, get_gdl_loss, get_sim_loss
 from Loss import get_mae, get_head, get_skull, get_dice
 from Loss import get_psnr, get_ssim
 from Dataset import Train, Val
@@ -50,12 +50,14 @@ METRICS_PSNR = 5
 METRICS_SSIM = 6
 
 # Pixel-Wise Loss
-LAMBDA_1 = 1
+LAMBDA_1 = 5
 # Gradient Difference Loss
 LAMBDA_2 = 1
+# Similarity Loss
+LAMBDA_3 = 3
 
 DATA_PATH = "/home/ccy/DLMI/Data"
-MODEL_PATH = "/home/ccy/DLMI/UNET/Result/Model/2024-04-07_13-10.pt"
+MODEL_PATH = ""
 RESULTS_PATH = "/home/ccy/DLMI/UNET/Result"
 
 
@@ -318,8 +320,11 @@ class Training():
             # Gradient Difference loss
             loss_gdl = get_gdl_loss(fake2_g, real2_g)           
 
+            # Similarity loss
+            loss_sim = get_gdl_loss(fake2_g, real2_g)              
+
             # Total Loss
-            loss = LAMBDA_1 * loss_pix + LAMBDA_2 * loss_gdl
+            loss = LAMBDA_1 * loss_pix + LAMBDA_2 * loss_gdl + LAMBDA_3 * loss_sim
 
             # Update Generator's Parameters
             loss.backward()
@@ -425,10 +430,13 @@ class Training():
                 loss_pix = get_pix_loss(fake2_g, real2_g)      
 
                 # Gradient Difference loss
-                loss_gdl = get_gdl_loss(fake2_g, real2_g)           
+                loss_gdl = get_gdl_loss(fake2_g, real2_g)
+
+                # Similarity loss
+                loss_sim = get_gdl_loss(fake2_g, real2_g)              
 
                 # Total Loss
-                loss = LAMBDA_1 * loss_pix + LAMBDA_2 * loss_gdl
+                loss = LAMBDA_1 * loss_pix + LAMBDA_2 * loss_gdl + LAMBDA_3 * loss_sim
 
                 """
                 ========================================================================================
@@ -491,6 +499,7 @@ class Training():
             print('Pretrain:', PRETRAIN, file = f)
             print('Pix Loss Lamda:', LAMBDA_1, file = f)
             print('GDL Loss Lamda:', LAMBDA_2, file = f)
+            print('Sim Loss Lamda:', LAMBDA_3, file = f)
 
         return
     

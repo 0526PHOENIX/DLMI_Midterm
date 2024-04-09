@@ -50,14 +50,14 @@ METRICS_PSNR = 5
 METRICS_SSIM = 6
 
 # Pixel-Wise Loss
-LAMBDA_1 = 5
+LAMBDA_1 = 10
 # Gradient Difference Loss
-LAMBDA_2 = 1
+LAMBDA_2 = 3
 # Similarity Loss
-LAMBDA_3 = 3
+LAMBDA_3 = 1
 
 DATA_PATH = "/home/ccy/DLMI/Data"
-MODEL_PATH = ""
+MODEL_PATH = "/home/ccy/DLMI/UNET/Result/Model/2024-04-09_19-59.pt"
 RESULTS_PATH = "/home/ccy/DLMI/UNET/Result"
 
 

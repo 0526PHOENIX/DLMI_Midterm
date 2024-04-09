@@ -213,7 +213,6 @@ class Training():
         best_score = self.load_model()
 
         # Main Training and Validation Loop
-        count = 0
         for epoch_index in range(self.begin, EPOCH + 1):
             
             """
@@ -321,7 +320,7 @@ class Training():
             loss_gdl = get_gdl_loss(fake2_g, real2_g)           
 
             # Similarity loss
-            loss_sim = get_gdl_loss(fake2_g, real2_g)              
+            loss_sim = get_sim_loss(fake2_g, real2_g)              
 
             # Total Loss
             loss = LAMBDA_1 * loss_pix + LAMBDA_2 * loss_gdl + LAMBDA_3 * loss_sim
@@ -433,7 +432,7 @@ class Training():
                 loss_gdl = get_gdl_loss(fake2_g, real2_g)
 
                 # Similarity loss
-                loss_sim = get_gdl_loss(fake2_g, real2_g)              
+                loss_sim = get_sim_loss(fake2_g, real2_g)              
 
                 # Total Loss
                 loss = LAMBDA_1 * loss_pix + LAMBDA_2 * loss_gdl + LAMBDA_3 * loss_sim

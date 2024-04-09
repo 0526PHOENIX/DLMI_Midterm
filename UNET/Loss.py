@@ -83,7 +83,7 @@ def get_head(predicts, labels, masks):
 Skull MAE: L1 Loss
 ====================================================================================================
 """
-def get_skull(predicts, labels, threshold = 300):
+def get_skull(predicts, labels, threshold = 2000):
 
     predicts = torch.where(predicts > threshold, predicts, -1000)
     labels = torch.where(labels > threshold, labels, -1000)
@@ -96,7 +96,7 @@ def get_skull(predicts, labels, threshold = 300):
 Skull Dice
 ====================================================================================================
 """
-def get_dice(predicts, labels, threshold = 300):
+def get_dice(predicts, labels, threshold = 2000):
 
     predicts = torch.where(predicts > threshold, 1, 0)
     labels = torch.where(labels > threshold, 1, 0)

@@ -16,11 +16,11 @@ import nibabel as nib
 Global Constant
 ====================================================================================================
 """
-RAW = "C:/Users/PHOENIX/Desktop/DLMI/Data_Raw/Val"
+RAW = "C:/Users/PHOENIX/Desktop/DLMI/Data_Raw/Test"
 
-DATA = "C:/Users/PHOENIX/Desktop/DLMI/Data/Val"
+DATA = "C:/Users/PHOENIX/Desktop/DLMI/Data/Test"
 
-NII = "C:/Users/PHOENIX/Desktop/DLMI/Data_Nii/Val"
+NII = "C:/Users/PHOENIX/Desktop/DLMI/Data_Nii/Test"
 
 PATH_LIST = [DATA, NII]
 
@@ -151,13 +151,17 @@ class Preprocess():
     """
     def npy2nii(self):
 
-        # Save Nifti Data
+        # Save MR
         images = nib.Nifti1Image(self.images, np.eye(4))
         nib.save(images, os.path.join(NII, 'MR.nii'))
 
-        labels = nib.Nifti1Image(self.labels, np.eye(4))
+        # Save CT
+        labels = (self.labels * 4000) - 1000
+
+        labels = nib.Nifti1Image(labels, np.eye(4))
         nib.save(labels, os.path.join(NII, 'CT.nii'))
 
+        # Save Head Region
         target = nib.Nifti1Image(self.target, np.eye(4))
         nib.save(target, os.path.join(NII, 'TG.nii'))
 

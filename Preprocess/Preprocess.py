@@ -17,11 +17,11 @@ import nibabel as nib
 Global Constant
 ====================================================================================================
 """
-RAW = "C:/Users/PHOENIX/Desktop/DLMI/Data_Raw/Train"
+RAW = ""
 
-DATA = "C:/Users/PHOENIX/Desktop/DLMI/Data/Train"
+DATA = ""
 
-NII = "C:/Users/PHOENIX/Desktop/DLMI/Data_Nii/Train"
+NII = ""
 
 PATH_LIST = [DATA, NII]
 

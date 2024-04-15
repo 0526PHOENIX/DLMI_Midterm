@@ -6,7 +6,6 @@ Package
 import os
 import random
 import numpy as np
-from matplotlib import pyplot as plt
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -71,7 +70,7 @@ Main Function
 """
 if __name__ == '__main__':
 
-    filepath = "C:/Users/PHOENIX/Desktop/DLMI/Data"
+    filepath = ""
 
     train = Data(filepath, 'Train')
     val = Data(filepath, 'Val')

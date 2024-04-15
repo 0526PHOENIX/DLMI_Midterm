@@ -56,9 +56,9 @@ LAMBDA_2 = 3
 # Similarity Loss
 LAMBDA_3 = 1
 
-DATA_PATH = "/home/ccy/DLMI/Data"
-MODEL_PATH = "/home/ccy/DLMI/UNET/Result/Model/2024-04-09_19-59.pt"
-RESULTS_PATH = "/home/ccy/DLMI/UNET/Result"
+DATA_PATH = ""
+MODEL_PATH = ""
+RESULTS_PATH = ""
 
 
 """

@@ -20,7 +20,7 @@ from torch.utils.tensorboard import SummaryWriter
 from Unet import Unet, Pretrain
 from Loss import get_mae, get_head, get_skull, get_dice
 from Loss import get_psnr, get_ssim
-from Dataset import Val, Test
+from Dataset import Data
 
 
 """
@@ -41,9 +41,9 @@ METRICS_SSIM = 5
 
 PRETRAIN = True
 
-DATA_PATH = "/home/ccy/DLMI/Data"
-MODEL_PATH = "/home/ccy/DLMI/UNET/Result/Model/2024-04-09_19-59.best.pt"
-RESULTS_PATH = "/home/ccy/DLMI/UNET/Evaluate"
+DATA_PATH = "C:/Users/PHOENIX/Desktop/DLMI/Data"
+MODEL_PATH = "C:/Users/PHOENIX/Desktop/DLMI/UNET/Result/Model/2024-04-05_20-08.pt"
+RESULTS_PATH = "C:/Users/PHOENIX/Desktop/DLMI/UNET/Evaluate"
 
 
 """
@@ -90,11 +90,11 @@ class Evaluate():
     def init_dl(self):
 
         # Validation
-        val_ds = Val(root = DATA_PATH)
+        val_ds = Data(root = DATA_PATH, mode = 'Val')
         val_dl = DataLoader(val_ds, batch_size = BATCH, shuffle = True, drop_last = False)
 
         # Testing
-        test_ds = Test(root = DATA_PATH)
+        test_ds = Data(root = DATA_PATH, mode = 'Test')
         test_dl = DataLoader(test_ds, batch_size = BATCH, drop_last = False)
 
         return val_dl, test_dl

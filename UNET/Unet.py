@@ -264,8 +264,8 @@ if __name__ == '__main__':
     device = (torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
     print('\n' + 'Training on device: ' + str(device) + '\n')
     
-    model_1 = Unet().to(device = device)
-    print(summary(model_1, input_size = (1, 256, 256), batch_size = 2))
+    # model_1 = Unet().to(device = device)
+    # print(summary(model_1, input_size = (1, 256, 256), batch_size = 2))
 
-    # model_2 = Pretrain().to(device = device)
-    # print(summary(model_2, input_size = (1, 192, 192), batch_size = 2))
+    model_2 = Pretrain().to(device = device)
+    print(summary(model_2, input_size = (1, 192, 192), batch_size = 2))

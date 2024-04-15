@@ -24,7 +24,7 @@ from Unet import Unet, Pretrain
 from Loss import get_pix_loss, get_gdl_loss, get_sim_loss
 from Loss import get_mae, get_head, get_skull, get_dice
 from Loss import get_psnr, get_ssim
-from Dataset import Train, Val
+from Dataset import Data
 
 
 """
@@ -127,14 +127,14 @@ class Training():
     def init_dl(self):
 
         # Training
-        train_ds = Train(root = DATA_PATH)
+        train_ds = Data(root = DATA_PATH, mode = 'Train')
         train_dl = DataLoader(train_ds, batch_size = BATCH, shuffle = True, drop_last = False)
 
         # Training Sample Index
         self.train_index = random.randint(0, len(train_ds) - 1)
 
         # Validation
-        val_ds = Val(root = DATA_PATH)
+        val_ds = Data(root = DATA_PATH, mode = 'Val')
         val_dl = DataLoader(val_ds, batch_size = BATCH, shuffle = True, drop_last = False)
 
         # Validation Sample Index

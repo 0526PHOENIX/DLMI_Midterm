@@ -5,7 +5,7 @@ Package
 """
 import os
 from scipy import ndimage
-from scipy.ndimage.morphology import binary_dilation, binary_erosion
+from scipy.ndimage import binary_dilation, binary_erosion
 from matplotlib import pyplot as plt
 
 import numpy as np
@@ -17,11 +17,11 @@ import nibabel as nib
 Global Constant
 ====================================================================================================
 """
-RAW = "C:/Users/PHOENIX/Desktop/DLMI/Data_Raw/Test"
+RAW = "C:/Users/PHOENIX/Desktop/DLMI/Data_Raw/Train"
 
-DATA = "C:/Users/PHOENIX/Desktop/DLMI/Data/Test"
+DATA = "C:/Users/PHOENIX/Desktop/DLMI/Data/Train"
 
-NII = "C:/Users/PHOENIX/Desktop/DLMI/Data_Nii/Test"
+NII = "C:/Users/PHOENIX/Desktop/DLMI/Data_Nii/Train"
 
 PATH_LIST = [DATA, NII]
 
@@ -75,8 +75,8 @@ class Preprocess():
             label = self.labels[i]
 
             # Rotate
-            image = np.rot90(image)
-            label = np.rot90(label)
+            # image = np.rot90(image)
+            # label = np.rot90(label)
 
             # Thresholding
             binary = (image > 0.0625)

@@ -41,9 +41,9 @@ METRICS_SSIM = 5
 
 PRETRAIN = True
 
-DATA_PATH = "C:/Users/PHOENIX/Desktop/DLMI/Data"
-MODEL_PATH = "C:/Users/PHOENIX/Desktop/DLMI/UNET/Result/Model/2024-04-05_20-08.pt"
-RESULTS_PATH = "C:/Users/PHOENIX/Desktop/DLMI/UNET/Evaluate"
+DATA_PATH = ""
+MODEL_PATH = ""
+RESULTS_PATH = ""
 
 
 """
